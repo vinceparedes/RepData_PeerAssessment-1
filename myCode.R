@@ -100,3 +100,26 @@ g1 <- ggplot(dfTotal, aes(date, total) ) +
   ggtitle("Histogram - With Interpolated Values")
 print(g1)
 
+#Are there differences in activity patterns between weekdays and weekends?
+
+dfDays <- dfClean
+dfDays$date <- as.Date(dfDays$date)
+
+dfDays <- dfDays  %>% mutate(dayType = ifelse(weekdays(date)=="Saturday" | weekdays(date)=="Sunday", "weekend", "weekday"))
+
+#Mean steps per interval (across days) - with interpolated values
+dfMeanbyInterval3 <-  dfDays %>% 
+  group_by(interval, dayType) %>%
+  summarize (mn = mean(steps) )
+
+#plot the graphs
+g3 <- ggplot(dfMeanbyInterval3, aes(interval, mn)) + 
+  geom_line() +
+  facet_grid(dayType~.) + 
+  labs(x="Interval Start Time", y="Average Steps per Interval") + 
+  ggtitle("Time Series - Weekend versus Weekdays")
+print(g3)
+
+
+
+
