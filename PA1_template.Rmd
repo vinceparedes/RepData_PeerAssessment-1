@@ -5,6 +5,7 @@ output:
     keep_md: true
 ---
 
+This study uses activity monitoring data for analysis. See the ReadMe file for more information.
 
 ## Loading and preprocessing the data
 ```{r}
@@ -16,9 +17,6 @@ library(ggplot2)
 ##read the data file
 df <- read.csv("activity.csv", stringsAsFactors = FALSE)
 ```
-
-
-
 
 ## What is mean total number of steps taken per day?
 ```{r}
@@ -40,25 +38,22 @@ dfMeanbyInterval <-  df %>%
         group_by(interval) %>%
         summarize (mn = mean(steps) )
 
+#change date to type date to make the graph work correctly
+dfTotal$date <- as.Date(dfTotal$date)
+
+##make the plot of total steps per day
+g1 <- ggplot(dfTotal, aes(date, total) ) + 
+    geom_line() +
+    labs(x="Date", y="Steps per Day") + 
+    ggtitle("Histogram")
+print(g1)
+
 ```
 
 
 
 ## What is the average daily activity pattern?
 ```{r}
-##open graphics device
-#png(file = "plot1.png", width = 480, height = 480, units = "px") 
-
-
-#change date to type date to make the graph work correctly
-dfTotal$date <- as.Date(dfTotal$date)
-
-##make the plot
-g1 <- ggplot(dfTotal, aes(date, total) ) + 
-    geom_line() +
-    labs(x="Date", y="Steps per Day") + 
-    ggtitle("Histogram")
-print(g1)
 
 ##make the plot
 g2 <- ggplot(dfMeanbyInterval, aes(interval, mn) ) + 
@@ -74,9 +69,12 @@ print(g2)
 theMax <- dfMeanbyInterval %>% summarize(max(mn))
 maxVector <- dfMeanbyInterval %>% filter(as.double(mn) == as.double(theMax)) 
 
-
-
 ```
+The interval (time) with the greatest average number of steps is shown below.
+```{r}
+print(maxVector)
+```
+So 8:35 am is the time of most activity.
 
 
 ## Imputing missing values
@@ -130,12 +128,11 @@ g1 <- ggplot(dfTotal, aes(date, total) ) +
   ggtitle("Histogram - With Interpolated Values")
 print(g1)
 
-
-
-
-
 ```
+The total number of missing values in the dataset is: 2304
+The missing values will be replaced with the average value for each time period in the rest of the dataset. 
 
+This method does not seem to affect the total values. 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -157,6 +154,5 @@ g3 <- ggplot(dfMeanbyInterval3, aes(interval, mn)) +
   labs(x="Interval Start Time", y="Average Steps per Interval") + 
   ggtitle("Time Series - Weekend versus Weekdays")
 print(g3)
-
 ```
-
+Results show that there is a difference in the pattern between weekdays and weekends. This is especially apparent with the difference between the 8:35 am peak in activity on weekdays and the less consistent activity on weekends at that time. However, oveall activity seems to be greater on weekends than on weekdays. 

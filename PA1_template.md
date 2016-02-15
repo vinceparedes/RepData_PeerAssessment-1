@@ -1,5 +1,6 @@
 # Reproducible Research: Peer Assessment 1
 
+This study uses activity monitoring data for analysis. See the ReadMe file for more information.
 
 ## Loading and preprocessing the data
 
@@ -32,9 +33,6 @@ library(ggplot2)
 df <- read.csv("activity.csv", stringsAsFactors = FALSE)
 ```
 
-
-
-
 ## What is mean total number of steps taken per day?
 
 ```r
@@ -55,21 +53,11 @@ dfMeanbyInterval <-  df %>%
         filter(steps != "NA") %>%
         group_by(interval) %>%
         summarize (mn = mean(steps) )
-```
-
-
-
-## What is the average daily activity pattern?
-
-```r
-##open graphics device
-#png(file = "plot1.png", width = 480, height = 480, units = "px") 
-
 
 #change date to type date to make the graph work correctly
 dfTotal$date <- as.Date(dfTotal$date)
 
-##make the plot
+##make the plot of total steps per day
 g1 <- ggplot(dfTotal, aes(date, total) ) + 
     geom_line() +
     labs(x="Date", y="Steps per Day") + 
@@ -77,7 +65,11 @@ g1 <- ggplot(dfTotal, aes(date, total) ) +
 print(g1)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)
+
+
+
+## What is the average daily activity pattern?
 
 ```r
 ##make the plot
@@ -88,7 +80,7 @@ g2 <- ggplot(dfMeanbyInterval, aes(interval, mn) ) +
 print(g2)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-2.png)
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)
 
 ```r
 #dev.off() ##close the png file device
@@ -97,6 +89,20 @@ print(g2)
 theMax <- dfMeanbyInterval %>% summarize(max(mn))
 maxVector <- dfMeanbyInterval %>% filter(as.double(mn) == as.double(theMax)) 
 ```
+The interval (time) with the greatest average number of steps is shown below.
+
+```r
+print(maxVector)
+```
+
+```
+## Source: local data frame [1 x 2]
+## 
+##   interval       mn
+##      (int)    (dbl)
+## 1      835 206.1698
+```
+So 8:35 am is the time of most activity.
 
 
 ## Imputing missing values
@@ -157,8 +163,11 @@ g1 <- ggplot(dfTotal, aes(date, total) ) +
 print(g1)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)
+The total number of missing values in the dataset is: 2304
+The missing values will be replaced with the average value for each time period in the rest of the dataset. 
 
+This method does not seem to affect the total values. 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -183,5 +192,5 @@ g3 <- ggplot(dfMeanbyInterval3, aes(interval, mn)) +
 print(g3)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)
-
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)
+Results show that there is a difference in the pattern between weekdays and weekends. This is especially apparent with the difference between the 8:35 am peak in activity on weekdays and the less consistent activity on weekends at that time. However, oveall activity seems to be greater on weekends than on weekdays. 
