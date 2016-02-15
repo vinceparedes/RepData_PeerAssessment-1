@@ -1,5 +1,6 @@
 setwd("~/gitStuff/datasciencecoursera/RepData_PeerAssessment1-master")
 library(dplyr)
+library(ggplot2)
 
 ##read the data file
 df <- read.csv("activity.csv", stringsAsFactors = FALSE)
@@ -26,9 +27,6 @@ dfMeanbyInterval <-  df %>%
 
 ##open graphics device
 #png(file = "plot1.png", width = 480, height = 480, units = "px") 
-
-
-library(ggplot2)
 
 #change date to type date to make the graph work correctly
 dfTotal$date <- as.Date(dfTotal$date)
@@ -65,4 +63,40 @@ dfMissingCount <- summarise(dfMissing, n())
 dfMissing$interval <- as.character(dfMissing$interval) 
 dfMeanbyInterval$interval <- as.character(dfMeanbyInterval$interval) 
 
+
 dfFilled <- left_join(dfMissing, dfMeanbyInterval) %>% transmute(date, interval, steps=mn)
+
+#Now combine the filled data with the original data
+dfNotMissing <- filter(df, !is.na(steps))
+#do some type casting
+  dfNotMissing$steps <- as.numeric(dfNotMissing$steps)
+  dfFilled$interval <- as.integer(dfFilled$interval)
+
+dfClean <- union(dfFilled, dfNotMissing, order_by(date) ) 
+
+
+##Mean and median number of steps per day - with interpolated values
+dfMeanbyDay2 <-  dfClean %>% 
+  group_by(date) %>%
+  summarize ( med= median(steps, na.rm=TRUE), mn = mean(steps, na.rm=TRUE) )
+
+#Total number of steps per day - with interpolated values
+dfTotal2 <- dfClean %>% 
+  group_by(date) %>%
+  summarize(total = sum(steps, na.rm=TRUE))
+
+#Mean steps per interval (across days) - with interpolated values
+dfMeanbyInterval2 <-  dfClean %>% 
+  group_by(interval) %>%
+  summarize (mn = mean(steps) )
+
+#change date to type date to make the graph work correctly
+dfTotal$date <- as.Date(dfTotal$date)
+
+##make the plot
+g1 <- ggplot(dfTotal, aes(date, total) ) + 
+  geom_line() +
+  labs(x="Date", y="Steps per Day") + 
+  ggtitle("Histogram - With Interpolated Values")
+print(g1)
+
